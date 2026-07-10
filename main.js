@@ -43,13 +43,14 @@ async function getEmbedURL() {
             }
         })
 
-        const errorData = await response.json().catch(() => ({}))
+        // Parse the response once and store it
+        const data = await response.json()
         
         if (!response.ok) {
-            throw new Error(errorData.error || errorData.details?.error || `HTTP ${response.status}`)
+            // Use the already parsed data for the error message
+            throw new Error(data.error || data.details?.error || `HTTP ${response.status}`)
         }
 
-        const data = await response.json()
         console.log('VM created successfully!')
         return data.embed_url
     } catch (error) {
