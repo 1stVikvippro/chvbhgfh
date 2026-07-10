@@ -9,7 +9,7 @@ import Hyperbeam from "@hyperbeam/web"
 
 // HARDCODE YOUR API KEY HERE
 // Make sure you're using a valid Hyperbeam API key (not a test key)
-const HARDCODED_API_KEY = "YOUR_ACTUAL_API_KEY_HERE" // Replace with your real API key
+const HARDCODED_API_KEY = "sk_test_zC4y1DsY7uREFdGIJCkhcvJLR8oxMp6vT6buZl9rB7A" // Replace with your real API key
 	
 (async () => {
 	let embedURL = ""
