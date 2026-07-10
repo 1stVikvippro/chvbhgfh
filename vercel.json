@@ -1,8 +1,5 @@
 {
-    "rewrites": [
-        {
-            "source": "/api/(.*)",
-            "destination": "/api/create-vm"
-        }
-    ]
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/create-vm" }
+  ]
 }
