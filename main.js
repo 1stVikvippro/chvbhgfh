@@ -7,23 +7,24 @@ import fontURL from "./fonts/helvetiker_regular.typeface.json?url"
 
 import Hyperbeam from "@hyperbeam/web"
 
-// HARDCODE YOUR API KEY HERE (NOT RECOMMENDED FOR PRODUCTION)
-const HARDCODED_API_KEY = "sk_test_zC4y1DsY7uREFdGIJCkhcvJLR8oxMp6vT6buZl9rB7A"
+// HARDCODE YOUR API KEY HERE
+// Make sure you're using a valid Hyperbeam API key (not a test key)
+const HARDCODED_API_KEY = "YOUR_ACTUAL_API_KEY_HERE" // Replace with your real API key
 	
 (async () => {
-	let embedURL = "" // DO NOT put your API key here - this is for embed URLs only
+	let embedURL = ""
 
 	if (embedURL === "") {
-		// 1. Try hardcoded API key first
+		// Try hardcoded API key first
 		let apiKey = HARDCODED_API_KEY
 
-		// 2. If no hardcoded key, try URL param
-		if (!apiKey || apiKey === "") {
+		// If no hardcoded key, try URL param
+		if (!apiKey || apiKey === "YOUR_ACTUAL_API_KEY_HERE") {
 			const params = new URLSearchParams(location.search)
 			apiKey = params.get('apiKey')
 		}
 
-		// 3. If still not provided, prompt the user
+		// If still not provided, prompt the user
 		if (!apiKey || apiKey === "") {
 			apiKey = prompt("Enter your Hyperbeam API key (get one at https://hyperbeam.com):")
 		}
@@ -33,16 +34,20 @@ const HARDCODED_API_KEY = "sk_test_zC4y1DsY7uREFdGIJCkhcvJLR8oxMp6vT6buZl9rB7A"
 			return
 		}
 
+		console.log("API Key length:", apiKey.length) // Debug - check if key is being read
+
 		try {
-			// 4. Create a new virtual machine using the Hyperbeam API
+			// Create a new virtual machine using the Hyperbeam API
 			const response = await fetch("https://engine.hyperbeam.com/v0/vm", {
 				method: "POST",
 				headers: {
 					"Authorization": `Bearer ${apiKey}`,
 					"Content-Type": "application/json"
 				},
-				body: JSON.stringify({}) // default options – you can add parameters here
+				body: JSON.stringify({})
 			})
+
+			console.log("Response status:", response.status) // Debug
 
 			if (!response.ok) {
 				const errorText = await response.text()
@@ -50,12 +55,15 @@ const HARDCODED_API_KEY = "sk_test_zC4y1DsY7uREFdGIJCkhcvJLR8oxMp6vT6buZl9rB7A"
 			}
 
 			const data = await response.json()
+			console.log("API Response:", data) // Debug
+
 			embedURL = data.embed_url
 
 			if (!embedURL) {
 				throw new Error("No embed_url in the API response")
 			}
 		} catch (err) {
+			console.error("Error details:", err)
 			alert(`Failed to start virtual computer: ${err.message}`)
 			return
 		}
