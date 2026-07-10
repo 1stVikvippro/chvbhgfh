@@ -8,20 +8,51 @@ import fontURL from "./fonts/helvetiker_regular.typeface.json?url"
 import Hyperbeam from "@hyperbeam/web"
 
 (async () => {
-	let embedURL = "" // Running locally and you have an embed URL? Set it here
+	let embedURL = "sk_test_zC4y1DsY7uREFdGIJCkhcvJLR8oxMp6vT6buZl9rB7A" // Manually set an embed URL here to skip API calls
+
 	if (embedURL === "") {
-		const room = location.pathname.substring(1)
-		const req = await fetch("https://demo-api.tutturu.workers.dev/" + room)
-		if (req.status >= 400) {
-			alert("We are out of demo servers! Visit hyperbeam.dev to get your own API key")
+		// 1. Try to get API key from URL param
+		const params = new URLSearchParams(location.search)
+		let apiKey = params.get('apiKey')
+
+		// 2. If not provided, prompt the user
+		if (!apiKey) {
+			apiKey = prompt("Enter your Hyperbeam API key (get one at https://hyperbeam.com):")
+		}
+
+		if (!apiKey) {
+			alert("API key is required to create a virtual computer.")
 			return
 		}
-		const body = await req.json()
-		if (body.room !== room) {
-			history.replaceState(null, null, "/" + body.room + location.search)
+
+		try {
+			// 3. Create a new virtual machine using the Hyperbeam API
+			const response = await fetch("https://engine.hyperbeam.com/v0/vm", {
+				method: "POST",
+				headers: {
+					"Authorization": `Bearer ${apiKey}`,
+					"Content-Type": "application/json"
+				},
+				body: JSON.stringify({}) // default options – you can add parameters here
+			})
+
+			if (!response.ok) {
+				const errorText = await response.text()
+				throw new Error(`API error (${response.status}): ${errorText}`)
+			}
+
+			const data = await response.json()
+			embedURL = data.embed_url
+
+			if (!embedURL) {
+				throw new Error("No embed_url in the API response")
+			}
+		} catch (err) {
+			alert(`Failed to start virtual computer: ${err.message}`)
+			return
 		}
-		embedURL = body.url
 	}
+
 	main(embedURL)
 })()
 
