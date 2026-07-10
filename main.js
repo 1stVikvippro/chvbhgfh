@@ -7,15 +7,16 @@ import fontURL from "./fonts/helvetiker_regular.typeface.json?url"
 
 import Hyperbeam from "@hyperbeam/web"
 
-// Replace with your API key or use the one from URL param
-const API_KEY = "sk_test_zC4y1DsY7uREFdGIJCkhcvJLR8oxMp6vT6buZl9rB7A"
+// REPLACE THIS WITH YOUR REAL API KEY FROM https://hyperbeam.com
+// DO NOT use sk_test_ keys - they won't work!
+const API_KEY = "sk_live_KXk0u1QN0B5sAsOyMANjgZYt_LSz3w3MFpEm336qPhk"
 
 async function getEmbedURL() {
     // Try hardcoded API key first
     let apiKey = API_KEY
 
-    // If placeholder, try URL param
-    if (!apiKey || apiKey === "YOUR_REAL_API_KEY_HERE") {
+    // If placeholder or test key, try URL param
+    if (!apiKey || apiKey === "YOUR_REAL_API_KEY_HERE" || apiKey.startsWith('sk_test_')) {
         const params = new URLSearchParams(window.location.search)
         const urlApiKey = params.get('apiKey')
         if (urlApiKey) {
@@ -24,17 +25,16 @@ async function getEmbedURL() {
     }
 
     // If still no key, prompt user
-    if (!apiKey || apiKey === "") {
-        apiKey = prompt("Enter your Hyperbeam API key (get one at https://hyperbeam.com):")
+    if (!apiKey || apiKey === "" || apiKey.startsWith('sk_test_')) {
+        apiKey = prompt("Enter your REAL Hyperbeam API key (get one at https://hyperbeam.com):")
     }
 
-    if (!apiKey || apiKey === "") {
-        alert("API key is required to create a virtual computer.")
+    if (!apiKey || apiKey === "" || apiKey.startsWith('sk_test_')) {
+        alert("Test keys (sk_test_) are not supported. Please use a real API key from your Hyperbeam dashboard.")
         return null
     }
 
     try {
-        // Call your Vercel API endpoint instead of Hyperbeam directly
         const response = await fetch('/api/create-vm', {
             method: 'POST',
             headers: {
@@ -43,9 +43,10 @@ async function getEmbedURL() {
             }
         })
 
+        const errorData = await response.json().catch(() => ({}))
+        
         if (!response.ok) {
-            const errorData = await response.json()
-            throw new Error(errorData.error || `HTTP ${response.status}`)
+            throw new Error(errorData.error || errorData.details?.error || `HTTP ${response.status}`)
         }
 
         const data = await response.json()
