@@ -7,67 +7,60 @@ import fontURL from "./fonts/helvetiker_regular.typeface.json?url"
 
 import Hyperbeam from "@hyperbeam/web"
 
-// REPLACE THIS WITH YOUR REAL API KEY
+// Replace with your API key or use the one from URL param
 const API_KEY = "sk_test_zC4y1DsY7uREFdGIJCkhcvJLR8oxMp6vT6buZl9rB7A"
 
-async function init() {
-    let embedURL = ""
+async function getEmbedURL() {
+    // Try hardcoded API key first
+    let apiKey = API_KEY
 
-    // If you manually set an embed URL, use it
-    if (embedURL === "") {
-        let apiKey = API_KEY
-
-        // If API_KEY is the placeholder, try URL param
-        if (!apiKey || apiKey === "YOUR_REAL_API_KEY_HERE") {
-            const params = new URLSearchParams(window.location.search)
-            const urlApiKey = params.get('apiKey')
-            if (urlApiKey) {
-                apiKey = urlApiKey
-            }
-        }
-
-        // If still no key, prompt user
-        if (!apiKey || apiKey === "") {
-            apiKey = prompt("Enter your Hyperbeam API key (get one at https://hyperbeam.com):")
-        }
-
-        if (!apiKey || apiKey === "") {
-            alert("API key is required to create a virtual computer.")
-            return
-        }
-
-        console.log("Using API key:", apiKey.substring(0, 10) + "...")
-
-        try {
-            const response = await fetch("https://engine.hyperbeam.com/v0/vm", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${apiKey}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({})
-            })
-
-            if (!response.ok) {
-                const errorText = await response.text()
-                throw new Error(`HTTP ${response.status}: ${errorText}`)
-            }
-
-            const data = await response.json()
-            embedURL = data.embed_url
-            
-            if (!embedURL) {
-                throw new Error("No embed_url in response")
-            }
-            
-            console.log("Got embed URL successfully!")
-            
-        } catch (error) {
-            console.error("Failed to create VM:", error)
-            alert(`Failed to start virtual computer: ${error.message}`)
-            return
+    // If placeholder, try URL param
+    if (!apiKey || apiKey === "YOUR_REAL_API_KEY_HERE") {
+        const params = new URLSearchParams(window.location.search)
+        const urlApiKey = params.get('apiKey')
+        if (urlApiKey) {
+            apiKey = urlApiKey
         }
     }
+
+    // If still no key, prompt user
+    if (!apiKey || apiKey === "") {
+        apiKey = prompt("Enter your Hyperbeam API key (get one at https://hyperbeam.com):")
+    }
+
+    if (!apiKey || apiKey === "") {
+        alert("API key is required to create a virtual computer.")
+        return null
+    }
+
+    try {
+        // Call your Vercel API endpoint instead of Hyperbeam directly
+        const response = await fetch('/api/create-vm', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${apiKey}`,
+                'Content-Type': 'application/json'
+            }
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error || `HTTP ${response.status}`)
+        }
+
+        const data = await response.json()
+        console.log('VM created successfully!')
+        return data.embed_url
+    } catch (error) {
+        console.error('Failed to create VM:', error)
+        alert(`Failed to start virtual computer: ${error.message}`)
+        return null
+    }
+}
+
+async function init() {
+    const embedURL = await getEmbedURL()
+    if (!embedURL) return
 
     // Start the 3D application
     main(embedURL)
