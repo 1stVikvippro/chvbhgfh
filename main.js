@@ -7,26 +7,34 @@ import fontURL from "./fonts/helvetiker_regular.typeface.json?url"
 
 import Hyperbeam from "@hyperbeam/web"
 
+// HARDCODE YOUR API KEY HERE (NOT RECOMMENDED FOR PRODUCTION)
+const HARDCODED_API_KEY = "sk_test_zC4y1DsY7uREFdGIJCkhcvJLR8oxMp6vT6buZl9rB7A"
+	
 (async () => {
-	let embedURL = "sk_test_zC4y1DsY7uREFdGIJCkhcvJLR8oxMp6vT6buZl9rB7A" // Manually set an embed URL here to skip API calls
+	let embedURL = "" // DO NOT put your API key here - this is for embed URLs only
 
 	if (embedURL === "") {
-		// 1. Try to get API key from URL param
-		const params = new URLSearchParams(location.search)
-		let apiKey = params.get('apiKey')
+		// 1. Try hardcoded API key first
+		let apiKey = HARDCODED_API_KEY
 
-		// 2. If not provided, prompt the user
-		if (!apiKey) {
+		// 2. If no hardcoded key, try URL param
+		if (!apiKey || apiKey === "") {
+			const params = new URLSearchParams(location.search)
+			apiKey = params.get('apiKey')
+		}
+
+		// 3. If still not provided, prompt the user
+		if (!apiKey || apiKey === "") {
 			apiKey = prompt("Enter your Hyperbeam API key (get one at https://hyperbeam.com):")
 		}
 
-		if (!apiKey) {
+		if (!apiKey || apiKey === "") {
 			alert("API key is required to create a virtual computer.")
 			return
 		}
 
 		try {
-			// 3. Create a new virtual machine using the Hyperbeam API
+			// 4. Create a new virtual machine using the Hyperbeam API
 			const response = await fetch("https://engine.hyperbeam.com/v0/vm", {
 				method: "POST",
 				headers: {
